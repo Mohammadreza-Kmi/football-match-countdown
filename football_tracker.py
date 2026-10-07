@@ -11,7 +11,7 @@ url_results = "https://api.football-data.org/v4/teams/81/matches?status=FINISHED
 headers = {"X-Auth-Token": api_key}
 
 def get_matches(url):
-    try :
+    try:
         response = requests.get(url, headers=headers, timeout=10)
     except requests.exceptions.RequestException:
         print("No connection")
@@ -29,6 +29,15 @@ def get_matches(url):
         print(f"Something went wrong, status: {response.status_code}")
         return None
     return response.json()['matches']
+
+def get_and_check(url, empty_message):
+    matches = get_matches(url)
+    if matches is None:
+        return None
+    if not matches:
+        print(empty_message)
+        return None
+    return matches
 
 def show_upcoming(matches):
     for m, match in enumerate(matches[:3], 1):
@@ -65,7 +74,6 @@ def show_results(matches):
         print(f"{home_team} {home_result} - {away_result} {away_team}")
         print()
 
-
 while True:
     print("1. Upcoming Matches")
     print("2. Recent Results")
@@ -73,20 +81,14 @@ while True:
     user_choice = input("Enter a number:")
 
     if user_choice == "1":
-        matches = get_matches(url_Scheduled)
-        if matches is None:
-            continue
+        matches = get_and_check(url_Scheduled, "No matches found")
         if not matches:
-            print("No matches found")
             continue
         show_upcoming(matches)
 
     elif user_choice == "2":
-        matches = get_matches(url_results)
-        if matches is None:
-            continue
+        matches = get_and_check(url_results, "No recent results found")
         if not matches:
-            print("No recent results found")
             continue
         show_results(matches)
 
